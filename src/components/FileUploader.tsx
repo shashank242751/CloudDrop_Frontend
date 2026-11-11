@@ -83,7 +83,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
         file.type || 'application/octet-stream',
         file.size,
         selectedExpiry.hours,
-        [], // Clean empty tags (internal tag input removed)
+        [],
       );
 
       // 2. Direct high-speed upload with progress tracking
@@ -114,21 +114,21 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
   };
 
   return (
-    <div className="card">
-      <div className="card-title">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <UploadCloud size={22} color="#3b82f6" />
-          <span>Send & Share Files</span>
+    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/20 mb-8 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2.5">
+          <UploadCloud size={22} className="text-blue-500" />
+          <h2 className="text-lg font-semibold text-white">Send & Share Files</h2>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', color: '#10b981' }}>
-          <Lock size={14} />
+        <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+          <Lock size={13} />
           <span>Encrypted Transfer</span>
         </div>
       </div>
 
       {/* File Dropzone */}
       <div
-        className="dropzone"
+        className="border-2 border-dashed border-slate-700/80 hover:border-blue-500 hover:bg-blue-500/[0.03] transition-all rounded-xl p-8 sm:p-10 text-center cursor-pointer group"
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
@@ -137,15 +137,15 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
           type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
-          style={{ display: 'none' }}
+          className="hidden"
         />
-        <div className="dropzone-icon">
-          <UploadCloud size={44} />
+        <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform">
+          <UploadCloud size={28} />
         </div>
-        <div className="dropzone-text">
+        <div className="text-base font-semibold text-gray-200 mb-1">
           {file ? file.name : 'Click to browse or drag and drop your file here'}
         </div>
-        <div className="dropzone-sub">
+        <div className="text-xs text-slate-400">
           {file
             ? `${(file.size / (1024 * 1024)).toFixed(2)} MB • ${file.type || 'Binary Document'}`
             : 'Supports files up to 5 GB • Auto-expiring secure links'}
@@ -153,42 +153,46 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
       </div>
 
       {/* Custom Dropdown Settings Bar */}
-      <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        <label style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-muted)' }}>
+      <div className="mt-6 flex flex-col gap-1.5">
+        <label className="text-xs font-medium text-slate-400">
           Link Expiration Window
         </label>
 
-        <div className="custom-dropdown-container" ref={dropdownRef}>
+        <div className="relative w-full" ref={dropdownRef}>
           <button
             type="button"
-            className={`custom-dropdown-trigger ${isDropdownOpen ? 'open' : ''}`}
+            className={`w-full flex items-center justify-between bg-slate-800/80 hover:bg-slate-800 border rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+              isDropdownOpen ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-700/80'
+            }`}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             disabled={isUploading}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <Clock size={16} color="#60a5fa" />
-              <span style={{ fontWeight: 500 }}>Expires in {selectedExpiry.label}</span>
+            <div className="flex items-center gap-2.5">
+              <Clock size={16} className="text-blue-400" />
+              <span className="font-medium text-white">Expires in {selectedExpiry.label}</span>
               {selectedExpiry.recommended && (
-                <span className="option-badge-recommended">Recommended</span>
+                <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
+                  Recommended
+                </span>
               )}
             </div>
             <ChevronDown
               size={18}
-              color="var(--text-muted)"
-              style={{
-                transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease',
-              }}
+              className={`text-slate-400 transition-transform duration-200 ${
+                isDropdownOpen ? 'rotate-180' : ''
+              }`}
             />
           </button>
 
           {isDropdownOpen && (
-            <div className="custom-dropdown-menu">
+            <div className="absolute top-full mt-2 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl shadow-black/50 z-50 overflow-hidden animate-dropdown divide-y divide-slate-800">
               {EXPIRY_OPTIONS.map((option) => (
                 <div
                   key={option.hours}
-                  className={`custom-dropdown-option ${
-                    selectedExpiry.hours === option.hours ? 'selected' : ''
+                  className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors ${
+                    selectedExpiry.hours === option.hours
+                      ? 'bg-blue-600/15 text-white'
+                      : 'hover:bg-slate-800/70 text-slate-200'
                   }`}
                   onClick={() => {
                     setSelectedExpiry(option);
@@ -196,16 +200,18 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
                   }}
                 >
                   <div>
-                    <div className="option-main">
+                    <div className="flex items-center gap-2 text-sm font-medium">
                       <span>Expires in {option.label}</span>
                       {option.recommended && (
-                        <span className="option-badge-recommended">Recommended</span>
+                        <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                          Recommended
+                        </span>
                       )}
                     </div>
-                    <div className="option-desc">{option.description}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">{option.description}</div>
                   </div>
                   {selectedExpiry.hours === option.hours && (
-                    <Check size={16} color="#3b82f6" />
+                    <Check size={16} className="text-blue-500 shrink-0 ml-3" />
                   )}
                 </div>
               ))}
@@ -216,13 +222,16 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
 
       {/* Upload Progress Bar */}
       {isUploading && (
-        <div className="progress-container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.8rem' }}>
+        <div className="mt-5">
+          <div className="flex justify-between mb-1.5 text-xs text-slate-400">
             <span>Encrypting and uploading securely...</span>
-            <span>{uploadProgress}%</span>
+            <span className="font-medium text-blue-400">{uploadProgress}%</span>
           </div>
-          <div className="progress-bar-bg">
-            <div className="progress-bar-fill" style={{ width: `${uploadProgress}%` }}></div>
+          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-200 rounded-full"
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
           </div>
         </div>
       )}
@@ -230,33 +239,25 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
       {/* Status Message */}
       {statusMessage && (
         <div
-          style={{
-            marginTop: '1.25rem',
-            padding: '0.85rem 1rem',
-            borderRadius: '0.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            fontSize: '0.875rem',
-            background:
-              statusMessage.type === 'success'
-                ? 'rgba(16, 185, 129, 0.15)'
-                : 'rgba(239, 68, 68, 0.15)',
-            color: statusMessage.type === 'success' ? '#10b981' : '#ef4444',
-            border: `1px solid ${
-              statusMessage.type === 'success' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'
-            }`,
-          }}
+          className={`mt-5 p-3.5 rounded-xl flex items-center gap-2.5 text-sm border ${
+            statusMessage.type === 'success'
+              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+              : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+          }`}
         >
-          {statusMessage.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+          {statusMessage.type === 'success' ? (
+            <CheckCircle2 size={18} className="shrink-0" />
+          ) : (
+            <AlertCircle size={18} className="shrink-0" />
+          )}
           <span>{statusMessage.text}</span>
         </div>
       )}
 
       {/* Action Button */}
-      <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+      <div className="mt-6 flex justify-end">
         <button
-          className="btn btn-primary"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm px-6 py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleUpload}
           disabled={!file || isUploading}
         >

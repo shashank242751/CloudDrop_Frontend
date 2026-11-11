@@ -73,142 +73,120 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
   };
 
   return (
-    <div className="card">
-      <div className="card-title">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span>Active Transfers & Files</span>
-          <span
-            style={{
-              background: 'rgba(59, 130, 246, 0.15)',
-              color: '#60a5fa',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              padding: '0.2rem 0.5rem',
-              borderRadius: '9999px',
-            }}
-          >
+    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-lg font-semibold text-white">Active Transfers & Files</h2>
+          <span className="bg-blue-500/15 text-blue-400 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-500/20">
             {files.length} Active
           </span>
         </div>
         <button
           onClick={onRefresh}
-          className="btn btn-secondary btn-sm"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700/80 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
           disabled={isLoading}
         >
-          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+          <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
           <span>Refresh</span>
         </button>
       </div>
 
       {files.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-muted)' }}>
-          <FileCheck size={40} style={{ margin: '0 auto 0.75rem', color: '#4b5563' }} />
-          <p style={{ fontSize: '1.05rem', fontWeight: 500, marginBottom: '0.35rem', color: 'var(--text-main)' }}>
+        <div className="text-center py-12 px-4 text-slate-400">
+          <FileCheck size={40} className="mx-auto mb-3 text-slate-600" />
+          <p className="text-base font-medium text-slate-200 mb-1">
             No active file transfers
           </p>
-          <p style={{ fontSize: '0.85rem' }}>
+          <p className="text-xs text-slate-500">
             Upload a file above to create your first secure sharing link.
           </p>
         </div>
       ) : (
-        <div className="table-responsive">
-          <table className="files-table">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr>
-                <th>File Name</th>
-                <th>Size</th>
-                <th>Status</th>
-                <th>Downloads</th>
-                <th>Expires</th>
-                <th>Security / Checksum</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+              <tr className="border-b border-slate-800 text-xs font-medium text-slate-400">
+                <th className="pb-3 px-3">File Name</th>
+                <th className="pb-3 px-3">Size</th>
+                <th className="pb-3 px-3">Status</th>
+                <th className="pb-3 px-3">Downloads</th>
+                <th className="pb-3 px-3">Expires</th>
+                <th className="pb-3 px-3">Security Verification</th>
+                <th className="pb-3 px-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-800/60">
               {files.map((file) => (
-                <tr key={file.fileId}>
-                  <td>
-                    <div style={{ fontWeight: 600 }}>{file.originalName}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <tr key={file.fileId} className="hover:bg-slate-800/30 transition-colors">
+                  <td className="py-4 px-3">
+                    <div className="font-semibold text-white">{file.originalName}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">
                       ID: {file.fileId.slice(0, 8)}...
                     </div>
                   </td>
-                  <td>{formatBytes(file.sizeBytes)}</td>
-                  <td>
+                  <td className="py-4 px-3 text-slate-300">{formatBytes(file.sizeBytes)}</td>
+                  <td className="py-4 px-3">
                     <span
-                      className={`status-badge ${
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                         file.status === 'READY'
-                          ? 'status-ready'
+                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                           : file.status === 'PROCESSING'
-                          ? 'status-processing'
-                          : 'status-pending'
+                          ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                          : 'bg-blue-500/15 text-blue-400 border-blue-500/30'
                       }`}
                     >
                       {file.status === 'READY' ? 'Available' : file.status}
                     </span>
                   </td>
-                  <td>
-                    <span style={{ fontWeight: 600, color: '#60a5fa' }}>
-                      {file.downloadCount || 0}
-                    </span>
+                  <td className="py-4 px-3 font-semibold text-blue-400">
+                    {file.downloadCount || 0}
                   </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <Clock size={14} color="var(--text-muted)" />
+                  <td className="py-4 px-3 text-slate-400">
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <Clock size={13} className="text-slate-500" />
                       <span>{formatExpiry(file.expiresAt)}</span>
                     </div>
                   </td>
-                  <td>
+                  <td className="py-4 px-3">
                     {file.processedMetadata?.md5Checksum ? (
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          background: 'rgba(16, 185, 129, 0.1)',
-                          padding: '0.2rem 0.5rem',
-                          borderRadius: '4px',
-                          color: '#10b981',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                        }}
-                      >
-                        <ShieldCheck size={12} />
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <ShieldCheck size={13} />
                         MD5: {file.processedMetadata.md5Checksum.slice(0, 10)}...
                       </span>
                     ) : (
-                      <span style={{ fontSize: '0.75rem', color: '#10b981' }}>
+                      <span className="text-xs text-emerald-400 font-medium">
                         Verified ✓
                       </span>
                     )}
                   </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
+                  <td className="py-4 px-3 text-right">
+                    <div className="inline-flex items-center gap-2">
                       <button
                         onClick={() => handleDownload(file.fileId)}
                         disabled={downloadingId === file.fileId}
-                        className="btn btn-secondary btn-sm"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-medium transition-colors"
                         title="Download file directly"
                       >
-                        <Download size={14} />
+                        <Download size={13} />
                         <span>Download</span>
                       </button>
 
                       <button
                         onClick={() => handleCopyLink(file.fileId)}
-                        className="btn btn-secondary btn-sm"
-                        title="Copy secure download link"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-medium transition-colors"
+                        title="Copy secure link"
                       >
-                        {copiedId === file.fileId ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
+                        {copiedId === file.fileId ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
                         <span>{copiedId === file.fileId ? 'Copied' : 'Share'}</span>
                       </button>
 
                       <button
                         onClick={() => handleDelete(file.fileId)}
                         disabled={deletingId === file.fileId}
-                        className="btn btn-danger btn-sm"
+                        className="p-1.5 bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 rounded-lg transition-colors"
                         title="Delete file"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </td>

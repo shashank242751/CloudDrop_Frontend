@@ -39,13 +39,15 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div>
+    <div className="min-h-screen bg-[#0b0f19] text-gray-100 flex flex-col">
       <Navbar systemStatus={systemStatus} />
 
-      <main className="container">
-        <section className="hero">
-          <h1>Intelligent, Secure File Transfer</h1>
-          <p>
+      <main className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-10 flex-1">
+        <section className="text-center mb-10">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-blue-400 via-indigo-300 to-pink-400 bg-clip-text text-transparent">
+            Intelligent, Secure File Transfer
+          </h1>
+          <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
             Fast, end-to-end encrypted file delivery for modern workflows.
             Share high-volume files with automated expiry, access limits, and instant verification.
           </p>
@@ -61,6 +63,10 @@ export const App: React.FC = () => {
           onRefresh={fetchFiles}
         />
       </main>
+
+      <footer className="border-t border-slate-800/60 py-6 text-center text-xs text-slate-500">
+        <p>© 2026 CloudDrop Platform. Secure Cloud Storage & File Distribution.</p>
+      </footer>
     </div>
   );
 };
