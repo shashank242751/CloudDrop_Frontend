@@ -42,3 +42,4 @@ The **CloudDrop Frontend** is an independent, production-grade Single Page Appli
 - Can be hosted on **AWS Amplify Hosting** (serverless global CDN).
 - Can alternatively be hosted on a **dedicated EC2 instance** running Nginx.
 - Contains zero backend code dependencies; communicates solely via REST endpoints specified by `VITE_API_URL`.
+

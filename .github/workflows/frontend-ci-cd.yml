@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Build & Test React SPA
+    name: Build & Test React SPA for AWS Amplify
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -27,21 +27,3 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL || '' }}
-
-  docker-build:
-    name: Build Frontend Docker Image (for EC2 Hosting)
-    needs: [build-and-test]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: false
-          tags: clouddrop-frontend:latest

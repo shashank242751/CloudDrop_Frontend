@@ -42,3 +42,4 @@ VITE_API_URL=http://clouddrop-demo-nlb-123456789.elb.us-east-1.amazonaws.com
 
 ### CORS Configuration
 The backend S3 bucket and NestJS controllers have CORS pre-configured to accept requests from any origin (`*`), ensuring seamless communication across domains without CORS errors!
+
