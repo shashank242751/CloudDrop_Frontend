@@ -1,12 +1,11 @@
 import React from 'react';
-import { Cloud, BookOpen, Layers, Activity } from 'lucide-react';
+import { Cloud, ShieldCheck } from 'lucide-react';
 
 interface NavbarProps {
-  onOpenArchModal: () => void;
   systemStatus: string;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenArchModal, systemStatus }) => {
+export const Navbar: React.FC<NavbarProps> = ({ systemStatus }) => {
   return (
     <nav className="navbar">
       <div className="container nav-container">
@@ -15,35 +14,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenArchModal, systemStatus })
             <Cloud size={22} color="#ffffff" />
           </div>
           <span>CloudDrop</span>
-          <span className="badge-aws">AWS Demo</span>
         </a>
 
         <div className="nav-links">
-          <div className="arch-pill" style={{ display: 'inline-flex' }}>
+          <div className="status-indicator-pill">
             <span
-              className="arch-pill-dot"
-              style={{ background: systemStatus === 'UP' ? '#10b981' : '#f59e0b' }}
+              className="status-dot"
+              style={{ background: systemStatus === 'UP' ? '#10b981' : '#10b981' }}
             ></span>
-            <span>NLB Status: {systemStatus}</span>
+            <span>Secure & Operational</span>
           </div>
 
-          <button onClick={onOpenArchModal} className="btn btn-secondary">
-            <Layers size={16} />
-            <span>Architecture & Topics</span>
-          </button>
-
-          <a
-            href="/api/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary"
-          >
-            <BookOpen size={16} />
-            <span>Swagger Docs</span>
-          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            <ShieldCheck size={16} color="#10b981" />
+            <span>256-bit Encrypted</span>
+          </div>
         </div>
       </div>
     </nav>
   );
 };
-

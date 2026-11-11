@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloud, CheckCircle2, AlertCircle, FileText, Loader2 } from 'lucide-react';
+import { UploadCloud, CheckCircle2, AlertCircle, Loader2, Lock } from 'lucide-react';
 import { api } from '../services/api';
 
 interface FileUploaderProps {
@@ -9,7 +9,7 @@ interface FileUploaderProps {
 export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) => {
   const [file, setFile] = useState<File | null>(null);
   const [expiryHours, setExpiryHours] = useState<number>(24);
-  const [tags, setTags] = useState<string>('project, demo');
+  const [tags, setTags] = useState<string>('project, documents');
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
@@ -45,7 +45,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
         .map((t) => t.trim())
         .filter(Boolean);
 
-      // 1. Request S3 Pre-signed URL from NestJS backend
+      // 1. Request secure upload ticket
       const session = await api.requestUpload(
         file.name,
         file.type || 'application/octet-stream',
@@ -54,17 +54,17 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
         parsedTags,
       );
 
-      // 2. Direct upload to AWS S3 using the pre-signed URL (zero EC2 bandwidth used!)
+      // 2. Direct high-speed upload with progress tracking
       await api.uploadDirectToS3(session.uploadUrl, file, (progress) => {
         setUploadProgress(progress);
       });
 
-      // 3. Confirm completion to backend (which marks status READY in DynamoDB)
+      // 3. Confirm completion
       await api.confirmUpload(session.fileId);
 
       setStatusMessage({
         type: 'success',
-        text: `"${file.name}" uploaded successfully directly to AWS S3!`,
+        text: `"${file.name}" uploaded successfully! Ready for secure sharing.`,
       });
 
       setFile(null);
@@ -74,7 +74,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
       console.error('Upload failed:', err);
       setStatusMessage({
         type: 'error',
-        text: err.response?.data?.message || err.message || 'File upload failed',
+        text: err.response?.data?.message || err.message || 'File upload failed. Please try again.',
       });
     } finally {
       setIsUploading(false);
@@ -84,8 +84,14 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
   return (
     <div className="card">
       <div className="card-title">
-        <span>Upload & Share File</span>
-        <span className="badge-aws">S3 + DynamoDB + Lambda</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <UploadCloud size={20} color="#3b82f6" />
+          <span>Send & Share Files</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: '#10b981' }}>
+          <Lock size={14} />
+          <span>Encrypted Transfer</span>
+        </div>
       </div>
 
       <div
@@ -104,41 +110,41 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
           <UploadCloud size={44} />
         </div>
         <div className="dropzone-text">
-          {file ? file.name : 'Click or Drag & Drop file here'}
+          {file ? file.name : 'Click to browse or drag and drop your file here'}
         </div>
         <div className="dropzone-sub">
           {file
-            ? `${(file.size / (1024 * 1024)).toFixed(2)} MB • ${file.type || 'Unknown type'}`
-            : 'Any file type up to 5 GB (Direct S3 Pre-signed Upload)'}
+            ? `${(file.size / (1024 * 1024)).toFixed(2)} MB • ${file.type || 'Binary Document'}`
+            : 'Supports files up to 5 GB • Auto-expiring secure links'}
         </div>
       </div>
 
       <div className="form-grid">
         <div className="form-group">
-          <label className="form-label">Expiration (DynamoDB TTL)</label>
+          <label className="form-label">Link Expiration</label>
           <select
             className="form-select"
             value={expiryHours}
             onChange={(e) => setExpiryHours(Number(e.target.value))}
             disabled={isUploading}
           >
-            <option value={1}>1 Hour</option>
-            <option value={12}>12 Hours</option>
-            <option value={24}>24 Hours (Default)</option>
-            <option value={72}>3 Days</option>
-            <option value={168}>7 Days</option>
+            <option value={1}>Expires in 1 Hour</option>
+            <option value={12}>Expires in 12 Hours</option>
+            <option value={24}>Expires in 24 Hours (Default)</option>
+            <option value={72}>Expires in 3 Days</option>
+            <option value={168}>Expires in 7 Days</option>
           </select>
         </div>
 
         <div className="form-group">
-          <label className="form-label">Tags (comma separated)</label>
+          <label className="form-label">Labels / Tags (optional)</label>
           <input
             type="text"
             className="form-input"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             disabled={isUploading}
-            placeholder="e.g. finance, backup, presentation"
+            placeholder="e.g. contracts, invoices, design"
           />
         </div>
       </div>
@@ -146,7 +152,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
       {isUploading && (
         <div className="progress-container">
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.8rem' }}>
-            <span>Uploading directly to Amazon S3...</span>
+            <span>Encrypting and uploading securely...</span>
             <span>{uploadProgress}%</span>
           </div>
           <div className="progress-bar-bg">
@@ -189,12 +195,12 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
           {isUploading ? (
             <>
               <Loader2 size={16} className="animate-spin" />
-              <span>Uploading to S3...</span>
+              <span>Uploading File...</span>
             </>
           ) : (
             <>
               <UploadCloud size={16} />
-              <span>Generate S3 Pre-Signed Upload & Transfer</span>
+              <span>Generate Secure Transfer Link</span>
             </>
           )}
         </button>
@@ -202,4 +208,3 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
     </div>
   );
 };
-

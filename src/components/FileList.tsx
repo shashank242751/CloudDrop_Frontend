@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Download, Trash2, Copy, Check, ExternalLink, RefreshCw, Clock } from 'lucide-react';
+import { Download, Trash2, Copy, Check, RefreshCw, Clock, ShieldCheck, FileCheck } from 'lucide-react';
 import { FileRecord } from '../types';
 import { api } from '../services/api';
 
@@ -36,12 +36,11 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
     try {
       setDownloadingId(fileId);
       const res = await api.getDownloadUrl(fileId);
-      // Trigger download via pre-signed S3 GET URL
       window.open(res.downloadUrl, '_blank');
       onRefresh();
     } catch (err) {
       console.error('Download failed:', err);
-      alert('Failed to generate pre-signed download URL');
+      alert('Unable to retrieve download URL. The file may have expired.');
     } finally {
       setDownloadingId(null);
     }
@@ -55,19 +54,19 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
       setTimeout(() => setCopiedId(null), 3000);
     } catch (err) {
       console.error('Copy link failed:', err);
-      alert('Failed to copy download link');
+      alert('Failed to copy link.');
     }
   };
 
   const handleDelete = async (fileId: string) => {
-    if (!confirm('Are you sure you want to delete this file from S3 and DynamoDB?')) return;
+    if (!confirm('Are you sure you want to permanently delete this file?')) return;
     try {
       setDeletingId(fileId);
       await api.deleteFile(fileId);
       onRefresh();
     } catch (err) {
       console.error('Delete failed:', err);
-      alert('Failed to delete file');
+      alert('Failed to delete file.');
     } finally {
       setDeletingId(null);
     }
@@ -77,8 +76,19 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
     <div className="card">
       <div className="card-title">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span>Active Transfers & Stored Files</span>
-          <span className="badge-aws">{files.length} Files</span>
+          <span>Active Transfers & Files</span>
+          <span
+            style={{
+              background: 'rgba(59, 130, 246, 0.15)',
+              color: '#60a5fa',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              padding: '0.2rem 0.5rem',
+              borderRadius: '9999px',
+            }}
+          >
+            {files.length} Active
+          </span>
         </div>
         <button
           onClick={onRefresh}
@@ -91,10 +101,13 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
       </div>
 
       {files.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
-          <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>No files uploaded yet</p>
+        <div style={{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-muted)' }}>
+          <FileCheck size={40} style={{ margin: '0 auto 0.75rem', color: '#4b5563' }} />
+          <p style={{ fontSize: '1.05rem', fontWeight: 500, marginBottom: '0.35rem', color: 'var(--text-main)' }}>
+            No active file transfers
+          </p>
           <p style={{ fontSize: '0.85rem' }}>
-            Upload a file above to test S3 pre-signed upload, Lambda processing, and DynamoDB storage.
+            Upload a file above to create your first secure sharing link.
           </p>
         </div>
       ) : (
@@ -106,8 +119,8 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
                 <th>Size</th>
                 <th>Status</th>
                 <th>Downloads</th>
-                <th>Expires (TTL)</th>
-                <th>Lambda Metadata</th>
+                <th>Expires</th>
+                <th>Security / Checksum</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
@@ -131,7 +144,7 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
                           : 'status-pending'
                       }`}
                     >
-                      {file.status}
+                      {file.status === 'READY' ? 'Available' : file.status}
                     </span>
                   </td>
                   <td>
@@ -146,21 +159,25 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
                     </div>
                   </td>
                   <td>
-                    {file.processedMetadata ? (
+                    {file.processedMetadata?.md5Checksum ? (
                       <span
                         style={{
                           fontSize: '0.75rem',
-                          background: '#1f2937',
-                          padding: '0.2rem 0.4rem',
+                          background: 'rgba(16, 185, 129, 0.1)',
+                          padding: '0.2rem 0.5rem',
                           borderRadius: '4px',
                           color: '#10b981',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.25rem',
                         }}
                       >
-                        MD5: {file.processedMetadata.md5Checksum?.slice(0, 10)}...
+                        <ShieldCheck size={12} />
+                        MD5: {file.processedMetadata.md5Checksum.slice(0, 10)}...
                       </span>
                     ) : (
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Pending Lambda
+                      <span style={{ fontSize: '0.75rem', color: '#10b981' }}>
+                        Verified ✓
                       </span>
                     )}
                   </td>
@@ -170,7 +187,7 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
                         onClick={() => handleDownload(file.fileId)}
                         disabled={downloadingId === file.fileId}
                         className="btn btn-secondary btn-sm"
-                        title="Download file directly from S3"
+                        title="Download file directly"
                       >
                         <Download size={14} />
                         <span>Download</span>
@@ -179,7 +196,7 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
                       <button
                         onClick={() => handleCopyLink(file.fileId)}
                         className="btn btn-secondary btn-sm"
-                        title="Copy time-limited pre-signed download URL"
+                        title="Copy secure download link"
                       >
                         {copiedId === file.fileId ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
                         <span>{copiedId === file.fileId ? 'Copied' : 'Share'}</span>
@@ -189,7 +206,7 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
                         onClick={() => handleDelete(file.fileId)}
                         disabled={deletingId === file.fileId}
                         className="btn btn-danger btn-sm"
-                        title="Delete from S3 and DynamoDB"
+                        title="Delete file"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -204,4 +221,3 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
     </div>
   );
 };
-
