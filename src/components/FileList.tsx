@@ -73,7 +73,7 @@ export const FileList: React.FC<FileListProps> = ({ files, isLoading, onRefresh 
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
+    <div className="relative z-10 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/20 backdrop-blur-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5">
           <h2 className="text-lg font-semibold text-white">Active Transfers & Files</h2>

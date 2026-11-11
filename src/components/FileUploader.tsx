@@ -114,7 +114,8 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/20 mb-8 backdrop-blur-sm">
+    /* Notice: relative z-30 ensures this card and its floating dropdown float ABOVE the card below */
+    <div className="relative z-30 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl shadow-black/20 mb-8 backdrop-blur-sm">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2.5">
           <UploadCloud size={22} className="text-blue-500" />
@@ -161,8 +162,8 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
         <div className="relative w-full" ref={dropdownRef}>
           <button
             type="button"
-            className={`w-full flex items-center justify-between bg-slate-800/80 hover:bg-slate-800 border rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
-              isDropdownOpen ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-700/80'
+            className={`w-full flex items-center justify-between bg-slate-800/90 hover:bg-slate-800 border rounded-xl px-4 py-3 text-sm transition-all focus:outline-none ${
+              isDropdownOpen ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-slate-700/80'
             }`}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             disabled={isUploading}
@@ -184,15 +185,16 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUploadSuccess }) =
             />
           </button>
 
+          {/* 100% solid, opaque background (bg-[#121a2d]) with high z-index and shadow so it never merges */}
           {isDropdownOpen && (
-            <div className="absolute top-full mt-2 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl shadow-black/50 z-50 overflow-hidden animate-dropdown divide-y divide-slate-800">
+            <div className="absolute top-full mt-2 left-0 right-0 bg-[#121a2d] border border-slate-700 rounded-xl shadow-2xl shadow-black z-50 overflow-hidden animate-dropdown divide-y divide-slate-800 ring-1 ring-slate-700/50">
               {EXPIRY_OPTIONS.map((option) => (
                 <div
                   key={option.hours}
                   className={`flex items-center justify-between px-4 py-3 cursor-pointer transition-colors ${
                     selectedExpiry.hours === option.hours
-                      ? 'bg-blue-600/15 text-white'
-                      : 'hover:bg-slate-800/70 text-slate-200'
+                      ? 'bg-blue-600/20 text-white'
+                      : 'hover:bg-slate-800/80 text-slate-200'
                   }`}
                   onClick={() => {
                     setSelectedExpiry(option);
